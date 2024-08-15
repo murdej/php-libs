@@ -109,6 +109,12 @@ class ProcI
 		return $this;
 	}
 
+    public function reverse() : self
+    {
+        $this->src = array_reverse($this->src);
+        return $this;
+    }
+
 	public function unique() : self
 	{
 		$this->src = array_unique($this->src);
@@ -202,6 +208,11 @@ class ProcI
         return $this;
     }
 
+    public function keys() : self {
+        $this->src = array_keys($this->src);
+        return $this;
+    }
+    
 	public static function from(...$srcs) : self
 	{
         $src = [];
@@ -220,7 +231,35 @@ class ProcI
 		return new ProcI($src);
 	}
 
-	//
+    public static function cartesianProduct(array $arrays, $callback = null): array {
+        if (count($arrays) == 0) {
+            return [[]];
+        }
+
+        $result = [];
+        foreach ($arrays[0] as $a) {
+            foreach (self::cartesianProduct(array_slice($arrays, 1)) as $product) {
+                array_unshift($product, $a);
+                $result[] = $callback
+                    ? $callback(...$product)
+                    : $product;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param array[] $arrays
+     * @return ProcI
+     */
+    public static function fromCartesian(array $arrays, $callback = null): ProcI
+    {
+        return self::from(self::cartesianProduct($arrays, $callback));
+    }
+
+
+    //
 	public static function selectFields($src, array $fields, bool $trans = false) : array
 	{
 		$res = [];
