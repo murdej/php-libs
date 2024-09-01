@@ -169,6 +169,18 @@ class ProcI
 		return $this;
 	}
 
+    public function shuffle() : self
+    {
+        shuffle($this->src);
+        return $this;
+    }
+
+    public function slice(int $offset, int $length) : self
+    {
+        $this->src = array_slice($this->src, $offset, $length);
+        return $this;
+    }
+
 	public function reduce($callback, $initial)
 	{
 		return array_reduce($this->src, $callback, $initial);
