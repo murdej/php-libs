@@ -109,6 +109,18 @@ class ProcI
 		return $this;
 	}
 
+    public function filterKey(array $keys, bool $strict = false) : self
+    {
+        $res = [];
+        foreach($this->src as $k => $item)
+        {
+            if (in_array($k, $keys, $strict)) $res[$k] = $item;
+        }
+        $this->src = $res;
+
+        return $this;
+    }
+
     public function reverse() : self
     {
         $this->src = array_reverse($this->src);
@@ -186,7 +198,7 @@ class ProcI
 		return array_reduce($this->src, $callback, $initial);
 	}
 
-	public function first($callback, $default = null)
+	public function first($callback, $default = null): mixed
 	{
 		$callback = self::prepareCallback($callback);
 
