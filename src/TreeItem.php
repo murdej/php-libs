@@ -13,9 +13,16 @@ class TreeItem
          */
         public mixed $item,
         /**
-         * @var T[]
+         * @var TreeItem<T>[]
          */
-        public array $children,
+        public array $children = [],
+
+        public int $level = 0,
+
+        /**
+         * @var TreeItem<T>|null
+         */
+        public ?TreeItem $parent = null
     ) { }
 
 }

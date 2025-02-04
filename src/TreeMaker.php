@@ -9,7 +9,7 @@ class TreeMaker
      * @param callable|string $getParentId
      * @param callable|string $getId
      * @param mixed|null $parentId
-     * @return TreeItem
+     * @return TreeItem[]
      */
     public static function make(
         array $elements,
@@ -18,15 +18,49 @@ class TreeMaker
         mixed $parentId = null,
     ) : array
     {
-        $byParents = ProcI::from($elements)->struct(fn($item) => json_encode(ProcI::prepareCallback($getParentId)($item)))->toArray();
-        $processElements = fn (array $elements) => array_map(
-            fn ($element) => new TreeItem(
-                $element,
-                $processElements($byParents[json_encode($getId($element))] ?? []),
-            ),
-            $elements,
-        );
+        $byParents = ProcI::from($elements)
+            ->struct(fn($item) => json_encode(ProcI::prepareCallback($getParentId)($item)), null)
+            ->toArray();
 
-        return $processElements($processElements($byParents[$parentId] ?? []));
+        $processElements = function (array $elements, ?TreeItem $parent) use (&$processElements, $getId, &$byParents) {
+            return array_map(
+                function ($element) use ($processElements, $byParents, $getId, $parent) {
+                    $node = new TreeItem(
+                        $element,
+                        parent: $parent,
+                    );
+                    $childs = $byParents[json_encode(ProcI::prepareCallback($getId)($element))] ?? false;
+                    if ($childs)
+                        $node->children = $processElements($childs, $node);
+
+                    return $node;
+                },
+                $elements,
+            );
+        };
+
+        return $processElements($byParents[json_encode($parentId)] ?? [], null);
+    }
+
+    /**
+     * @param TreeItem[]|TreeItem $items
+     * @return array
+     */
+    public static function linearize(array|TreeItem $items): array
+    {
+        $res = [];
+        $processNode = function (TreeItem $item, bool $add = true) use (&$res, &$processNode) {
+            if ($add) $res[] = $item;
+            foreach ($item->children as $subItem) {
+                $subItem->level = $item->level + 1;
+                $processNode($subItem);
+            }
+        };
+
+        if ($items instanceof TreeItem) $processNode($items);
+        else $processNode(new TreeItem(null, $items, -1), false);
+
+        return $res;
+
     }
 }

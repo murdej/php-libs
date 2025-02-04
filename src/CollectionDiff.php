@@ -42,9 +42,9 @@ class CollectionDiff
      * @param callable $changedCallback ($dbItem, $newItem) => true if diff
      */
     public static function compare(
-        array           $oldCollection,
+        iterable        $oldCollection,
         callable|string $dbKeyField,
-        array           $newCollection,
+        iterable        $newCollection,
         callable|string $newKeyField,
         callable        $diffCallback
     ): self {
