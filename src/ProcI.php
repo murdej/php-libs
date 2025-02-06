@@ -72,6 +72,18 @@ class ProcI
 		return $this;
 	}
 
+	public function each($itemCallback) : self
+	{
+		$itemCallback = self::prepareCallback($itemCallback);
+
+		foreach($this->src as $k => $item)
+		{
+			$itemCallback($item, $k);
+		}
+
+		return $this;
+	}
+
 	public function orderBy(...$callbacks) : self
 	{
 		if (!is_array($this->src)) $this->src = $this->toArray();

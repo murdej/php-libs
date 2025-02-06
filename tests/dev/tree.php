@@ -30,6 +30,12 @@ try {
         print_r(TreeMaker::linearize($node));
     }
 
+    foreach ([ 'B.1', 'C.1' ] as $name) {
+        echo "Find node: '$name'";
+        print_r(TreeMaker::findFirst($tree, fn($item) => $item->item->name === $name));
+        echo "\n";
+    }
+
 } catch (Throwable $exception) {
     print_r($exception);
 }

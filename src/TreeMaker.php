@@ -63,4 +63,35 @@ class TreeMaker
         return $res;
 
     }
+
+    /**
+     * Find first matching node
+     * @template T
+     * @param array|TreeItem<T> $items
+     * @param callable(TreeItem<T>):bool $predicate
+     * @return TreeItem<T>|null
+     */
+    public static function findFirst(array|TreeItem $items, callable $predicate): ?TreeItem
+    {
+        if ($items instanceof TreeItem) $items = [ $items ];
+        foreach ($items as $item) {
+            if ($predicate($item)) {
+                return $item;
+            }
+            $res = self::findFirst($item->children, $predicate);
+            if ($res !== null) return $res;
+        }
+        return null;
+    }
+
+    public static function path(TreeItem $node): array
+    {
+        $res = [];
+        while ($node) {
+            $res[] = $node;
+            $node = $node->parent;
+        }
+
+        return array_reverse($res);
+    }
 }
