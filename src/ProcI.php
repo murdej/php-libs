@@ -10,7 +10,41 @@ class ProcI
 	{
 		if (is_string($callback))
 		{
-			$toInt = false;
+            if (preg_match('/^(\((int|string|bool|float)\))?((\??[.\[][a-zA-Z_0-9]+)+|\.)$/', $callback, $m)) {
+                $path = [];
+                $convertTo = $m[2];
+                if ($m[3] !== '.') {
+                    preg_match_all('/(\??)([.\[])([a-zA-Z_0-9]+)/', $m[3], $matches);
+                    foreach (array_keys($matches[0]) as $i) {
+                        $path[] = [
+                            !!$matches[1][$i],
+                            $matches[2][$i],
+                            $matches[3][$i],
+                        ];
+                    }
+                    $callback = function ($item) use ($path, $convertTo) {
+                        $v = $item;
+                        foreach ($path as [ $nullable, $operator, $field]) {
+                            if ($v === null && $nullable) return null;
+                            if ($operator === '.') $v = $v->{$field};
+                            else $v = $v[$field];
+                        }
+                        if ($convertTo) {
+                            settype($v, $convertTo);
+                        }
+                        return $v;
+                    };
+                } else {
+                    $callback = function ($item) use ($convertTo) {
+                        $v = $item;
+                        if ($convertTo) {
+                            settype($v, $convertTo);
+                        }
+                        return $v;
+                    };
+                };
+            }
+			/* $toInt = false;
 			if (substr($callback, 0, 5) == '(int)')
 			{
 				$toInt = true;
@@ -49,7 +83,7 @@ class ProcI
 					$colName = substr($callback, 1);
 					$callback = function($item) use ($colName) { return $item[$colName]; };
 				}
-			}
+			} */
 		}
 
 		return $callback;

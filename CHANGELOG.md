@@ -1,6 +1,12 @@
 # PHP libs by Murdej
 
-## 1.1.0
+## 1.3.0
+
+ - `ProcI`
+   - String callbacks chaining (It is possible to use, for example `.foo.bar[1`)
+   - String callbacks allows null operator (`.foo?.bar`)
+
+## 1.2.0
 
  - `TreeMaker` 
    - link to parent in `TreeItem`
