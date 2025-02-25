@@ -118,6 +118,11 @@ class ProcI
 		return $this;
 	}
 
+    /**
+     * Order by callback return value
+     * @param ...$callbacks
+     * @return $this
+     */
 	public function orderBy(...$callbacks) : self
 	{
 		if (!is_array($this->src)) $this->src = $this->toArray();
@@ -141,7 +146,12 @@ class ProcI
 		return $this;
 	}
 
-	public function filter($callback) : self
+    /**
+     * Filter elements by callback
+     * @param string|array|callable $callback
+     * @return $this
+     */
+	public function filter(string|array|callable $callback) : self
 	{
 		$res = [];
 		$callback = self::prepareCallback($callback);
@@ -155,6 +165,12 @@ class ProcI
 		return $this;
 	}
 
+    /**
+     * Retains only elements with selected keys.
+     * @param array $keys
+     * @param bool $strict
+     * @return $this
+     */
     public function filterKey(array $keys, bool $strict = false) : self
     {
         $res = [];
@@ -167,12 +183,20 @@ class ProcI
         return $this;
     }
 
+    /**
+     * Reverses the order of the elements
+     * @return $this
+     */
     public function reverse() : self
     {
         $this->src = array_reverse($this->src);
         return $this;
     }
 
+    /**
+     * Removes duplicates
+     * @return $this
+     */
 	public function unique() : self
 	{
 		$this->src = array_unique($this->src);
@@ -180,11 +204,22 @@ class ProcI
 		return $this;
 	}
 
+    /**
+     * Modifies the key structure according to the passed callbacks.
+     * @param ...$callbacks
+     * @return $this
+     */
 	public function struct(...$callbacks) : self
 	{
 		return $this->mapStruct(null, ...$callbacks);
 	}
 
+    /**
+     * Modifies each element with a callback and modifies the key structure according to the passed callbacks.
+     * @param $mapCallback
+     * @param ...$callbacks
+     * @return $this
+     */
 	public function mapStruct($mapCallback, ...$callbacks) : self
 	{
 		$res = [];
@@ -227,23 +262,45 @@ class ProcI
 		return $this;
 	}
 
+    /**
+     * randomizes the order of the elements
+     * @return $this
+     */
     public function shuffle() : self
     {
         shuffle($this->src);
         return $this;
     }
 
+    /**
+     * Leaves only part of the field between the indices.
+     * @param int $offset
+     * @param int $length
+     * @return $this
+     */
     public function slice(int $offset, int $length) : self
     {
         $this->src = array_slice($this->src, $offset, $length);
         return $this;
     }
 
+    /**
+     * Perform on the elements reduce. Unlike most other methods, it returns the result of reduce and does not modify the internal array.
+     * @param $callback
+     * @param $initial
+     * @return mixed
+     */
 	public function reduce($callback, $initial)
 	{
 		return array_reduce($this->src, $callback, $initial);
 	}
 
+    /**
+     * Returns the first element
+     * @param $callback
+     * @param $default
+     * @return mixed
+     */
 	public function first($callback, $default = null): mixed
 	{
 		$callback = self::prepareCallback($callback);
@@ -261,10 +318,15 @@ class ProcI
 		if ($src instanceof self) $this->src = $src->src;
 		else $this->src = $src;
 	}
-	
-	public function toArray($iterable = null)
+
+    /**
+     * Returns elements as array
+     * @return array
+     */
+	public function toArray(/*$iterable = null*/)
 	{
-		if ($iterable === null) $iterable = $this->src;
+		/* if ($iterable === null) $iterable = $this->src; */
+        $iterable = $this->src;
 		if (!is_array($iterable)) {
 			$arr = [];
 			foreach($this->src as $k => $v) $arr[$k] = $v;
@@ -273,16 +335,29 @@ class ProcI
 		return $this->src;
 	}
 
+    /**
+     * Keep values only, remove keys. Applies `array_values` to internal arrays.
+     * @return $this
+     */
     public function values() : self {
         $this->src = array_values($this->src);
         return $this;
     }
 
+    /**
+     * Keep keys only as values. Applies `array_keys` to internal arrays.
+     * @return $this
+     */
     public function keys() : self {
         $this->src = array_keys($this->src);
         return $this;
     }
-    
+
+    /**
+     * Create instance of ProcI
+     * @param ...$srcs
+     * @return self
+     */
 	public static function from(...$srcs) : self
 	{
         $src = [];
@@ -363,7 +438,7 @@ class ProcI
 	}
 
     /**
-     * Vrací true pokud předaná podmínka platí pro všechny prvky, nebo je pole prázdné
+     * Returns true if the passed condition applies to all elements or the array is empty
      * @param $callback
      * @return bool
      */
@@ -377,7 +452,7 @@ class ProcI
     }
 
     /**
-     * Vrací true pokud předaná podmínka platí aspoň pro jeden prvek
+     * Returns true if the passed condition is valid for at least one element
      * @param $callback
      * @return bool
      */
@@ -390,6 +465,12 @@ class ProcI
         return false;
     }
 
+    /**
+     * Returns true if all elements are equal to the passed value.
+     * @param mixed $value
+     * @param bool $exact
+     * @return bool
+     */
     public function allAre(mixed $value, bool $exact = false) : bool {
         foreach ($this->src as $k => $v) {
             if ($exact ? ($v !== $value) : ($v != $value)) return false;
@@ -398,6 +479,12 @@ class ProcI
         return true;
     }
 
+    /**
+     * Returns true if at least one element is equal to the passed value.
+     * @param mixed $value
+     * @param bool $exact
+     * @return bool
+     */
     public function anyIs(mixed $value, bool $exact = false) : bool {
         foreach ($this->src as $k => $v) {
             if ($exact ? ($v === $value) : ($v == $value)) return true;
