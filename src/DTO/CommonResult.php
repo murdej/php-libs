@@ -32,4 +32,17 @@ class CommonResult implements \JsonSerializable
             'entity' => $this->entity,
 		];
 	}
+
+    public static function error(ErrorList $errors): static
+    {
+        $res = new static();
+        $res->errors = $errors;
+        return $res;
+    }
+
+    public static function ok(mixed $data = null): static
+    {
+        return new static($data);
+    }
+
 }

@@ -3,16 +3,12 @@
 namespace Murdej\DTO;
 
 use Murdej\ProcI;
-use Nette\SmartObject;
 
 /**
  * @template T
- * @property-read bool $isLast
- * @property-read int $nextLimitFrom
  */
 class ListResult
 {
-    use SmartObject;
     public function __construct(
         /**
          * @var T[]
