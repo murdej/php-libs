@@ -97,12 +97,12 @@ class StringWalk
 		$this->trace('toEndChunk');
 	}
 
-	/*
-	substr() - from last mark to actual position
-	substr($mark) - from mark to from actual position
-	substr($mark1, $mark2) - from mark1 to mark2
-	*/
-	public function substr($f = null, $t = null)
+	/**
+	 * substr() - from last mark to actual position
+	 * substr($mark) - from mark to from actual position
+	 * substr($mark1, $mark2) - from mark1 to mark2
+	 */
+	public function substr(?string $f = null, ?string $t = null): string
 	{
 		if ($f === null && $t === null)
 		{

@@ -10,8 +10,6 @@ class CommonResult implements \JsonSerializable
 	const StatusOk = 'ok';
 	const StatusError = 'error';
 
-	public mixed $entity = null;
-
 	public function getStatus(): string
 	{
 		return $this->errors->isValid() ? self::StatusOk : self::StatusError;
@@ -19,7 +17,9 @@ class CommonResult implements \JsonSerializable
 
 	public ErrorList $errors;
 
-	public function __construct(array $data = [])
+	public function __construct(
+        public mixed $data = []
+    )
 	{
 		$this->errors = new ErrorList($data);
 	}
@@ -29,7 +29,7 @@ class CommonResult implements \JsonSerializable
 		return [
 			'errors' => $this->errors,
 			'status' => $this->getStatus(),
-            'entity' => $this->entity,
+            'data' => $this->data,
 		];
 	}
 
@@ -42,7 +42,7 @@ class CommonResult implements \JsonSerializable
 
     public static function ok(mixed $data = null): static
     {
-        return new static($data);
+        return new static($data ?? []);
     }
 
 }
