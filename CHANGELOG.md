@@ -1,6 +1,6 @@
 # PHP libs by Murdej
 
-## 1.4.0
+## 1.5.0
 
  - `Arrays::flatten` and `Arrays::unflatten`
 
