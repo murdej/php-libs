@@ -2,7 +2,7 @@
 
 use Murdej\ProcI;
 
-require_once '../../vendor/autoload.php';
+require_once __DIR__ . '/../../vendor/autoload.php';
 
 $data = [
     (object)[
@@ -21,4 +21,14 @@ print_r(
     ProcI::from($data)
         ->map('.a[b')
         ->toArray()
+);
+
+print_r(
+    ProcI::cartesianProduct(
+        [
+            [ 1, 2, 3 ],
+            [ 'a', 'b', 'c' ]
+        ],
+        fn($a, $b) => [ 'a' => $a, 'b' => $b ]
+    )
 );

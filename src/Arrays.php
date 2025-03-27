@@ -47,4 +47,37 @@ class Arrays {
             }
         }
     }
+
+    public static function flatten(array $array, string $prefix = '', string $separator = '.', bool $firstLevel = true) : array {
+        $result = [];
+        foreach ($array as $key => $value) {
+            $new_key = $prefix . ($firstLevel ? '' : $separator) . $key;
+            if (is_array($value)) {
+                $result = array_merge($result, self::flatten($value, $new_key, $separator, false));
+            } else {
+                $result[$new_key] = $value;
+            }
+        }
+        return $result;
+    }
+
+    public static function unflatten(array $array, string $prefix = '', string $separator = '.') {
+        $result = [];
+        foreach ($array as $key => $value) {
+            if ($prefix) {
+                if (!str_starts_with($key, $prefix)) continue;
+                $key = substr($key, strlen($prefix));
+            }
+            $keys = explode($separator, $key);
+            $temp = &$result;
+            foreach ($keys as $inner_key) {
+                if (!isset($temp[$inner_key])) {
+                    $temp[$inner_key] = [];
+                }
+                $temp = &$temp[$inner_key];
+            }
+            $temp = $value;
+        }
+        return $result;
+    }
 }

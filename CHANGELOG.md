@@ -1,5 +1,9 @@
 # PHP libs by Murdej
 
+## 1.4.0
+
+ - `Arrays::flatten` and `Arrays::unflatten`
+
 ## 1.3.0
 
  - `ProcI`
