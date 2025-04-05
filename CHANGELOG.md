@@ -1,5 +1,9 @@
 # PHP libs by Murdej
 
+## 1.6.0
+
+ - `Arrays::getValue` and `Arrays::setValue`
+
 ## 1.5.0
 
  - `Arrays::flatten` and `Arrays::unflatten`
