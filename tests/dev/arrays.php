@@ -33,3 +33,16 @@ var_dump(Arrays::getValue($data, ['searchBuilder', 'conditions', 'date']));
 var_dump(Arrays::getValue($data, ['searchBuilder', 'conditions', 'date2'], 'default'));
 Arrays::setValue($data, ['searchBuilder', 'conditions', 'foo'], '789');
 print_r($data);
+
+print_r(Arrays::renameKeys(
+    [
+        'a' => 'A',
+        'b' => 'B',
+        'c' => 123,
+    ],
+    [
+        'a' => 'b',
+        'b' => 'a',
+        'd' => 'e',
+    ]
+));

@@ -115,4 +115,36 @@ class Arrays {
         }
         return $result;
     }
+
+
+    /**
+     * Renames keys in an array based on a provided mapping.
+     *
+     * This method iterates through the `$keys` array, which defines the renaming
+     * rules. For each key-value pair in `$keys`, where the key is the old key
+     * and the value is the new key, it checks if the old key exists in the
+     * input array `$arr`. If it does, the value associated with the old key
+     * is copied to a new key in the result array, and the old key is then removed.
+     * Keys in the original array that are not present as old keys in the
+     * `$keys` array will remain unchanged in the returned array.
+     *
+     * @param array{mixed} $arr The array whose keys need to be renamed.
+     * @param array<int|string,int|string> $keys An associative array where the keys are the old keys to be renamed and the values are the corresponding new keys.
+     * @return array A new array with the specified keys renamed.
+     */
+    public static function renameKeys(array $arr, array $keys) : array {
+        $newArr = $arr;
+        foreach($keys as $oldKey => $newKey) {
+            if (array_key_exists($oldKey, $arr)) {
+                unset($newArr[$oldKey]);
+            }
+        }
+        foreach($keys as $oldKey => $newKey) {
+            if (array_key_exists($oldKey, $arr)) {
+                $newArr[$newKey] = $arr[$oldKey];
+            }
+        }
+
+        return $newArr;
+    }
 }

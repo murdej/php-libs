@@ -1,12 +1,16 @@
 # PHP libs by Murdej
 
+## 1.7.0
+
+ - New method `Arrays::renameKeys`
+
 ## 1.6.0
 
- - `Arrays::getValue` and `Arrays::setValue`
+ - New method `Arrays::getValue` and `Arrays::setValue`
 
 ## 1.5.0
 
- - `Arrays::flatten` and `Arrays::unflatten`
+ - New method `Arrays::flatten` and `Arrays::unflatten`
 
 ## 1.3.0
 
