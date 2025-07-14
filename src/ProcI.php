@@ -2,6 +2,9 @@
 
 namespace Murdej;
 
+/**
+ * This tool allows you to perform various array operations such as changing the stucture, sorting, filtering, mapping and more.
+ */
 class ProcI
 {
 	public $src;
@@ -10,80 +13,44 @@ class ProcI
 	{
 		if (is_string($callback))
 		{
-            if (preg_match('/^(\((int|string|bool|float)\))?((\??[.\[][a-zA-Z_0-9]+)+|\.)$/', $callback, $m)) {
-                $path = [];
-                $convertTo = $m[2];
-                if ($m[3] !== '.') {
-                    preg_match_all('/(\??)([.\[])([a-zA-Z_0-9]+)/', $m[3], $matches);
-                    foreach (array_keys($matches[0]) as $i) {
-                        $path[] = [
-                            !!$matches[1][$i],
-                            $matches[2][$i],
-                            $matches[3][$i],
-                        ];
-                    }
-                    $callback = function ($item) use ($path, $convertTo) {
-                        $v = $item;
-                        foreach ($path as [ $nullable, $operator, $field]) {
-                            if ($v === null && $nullable) return null;
-                            if ($operator === '.') $v = $v->{$field};
-                            else $v = $v[$field];
-                        }
-                        if ($convertTo) {
-                            settype($v, $convertTo);
-                        }
-                        return $v;
-                    };
-                } else {
-                    $callback = function ($item) use ($convertTo) {
-                        $v = $item;
-                        if ($convertTo) {
-                            settype($v, $convertTo);
-                        }
-                        return $v;
-                    };
-                };
-            }
-			/* $toInt = false;
-			if (substr($callback, 0, 5) == '(int)')
-			{
-				$toInt = true;
-				$callback = substr($callback, 5);
+			if (preg_match('/^([\-]?)(\((int|string|bool|float)\))?((\??[.\[][a-zA-Z_0-9]+)+|\.)$/', $callback, $m)) {
+				$path = [];
+				$convertTo = $m[3];
+				if ($m[4] !== '.') {
+					preg_match_all('/(\??)([.\[])([a-zA-Z_0-9]+)/', $m[4], $matches);
+					foreach (array_keys($matches[0]) as $i) {
+						$path[] = [
+							!!$matches[1][$i],
+							$matches[2][$i],
+							$matches[3][$i],
+						];
+					}
+					$callback = function ($item) use ($path, $convertTo, $m) {
+						$v = $item;
+						foreach ($path as [ $nullable, $operator, $field]) {
+							if ($v === null && $nullable) return null;
+							if ($operator === '.') $v = $v->{$field};
+							else $v = $v[$field];
+						}
+						if ($convertTo) {
+							settype($v, $convertTo);
+						}
+						if ($m[1] === '-') $v = -$v;
+
+						return $v;
+					};
+				} else {
+					$callback = function ($item) use ($convertTo, $m) {
+						$v = $item;
+						if ($convertTo) {
+							settype($v, $convertTo);
+						}
+						if ($m[1] === '-') $v = -$v;
+
+						return $v;
+					};
+				};
 			}
-			if ($toInt)
-			{
-				if ($callback == '.')
-				{
-					$callback = function($item) { return (int)$item; };
-				}
-				elseif ($callback[0] == '.')
-				{
-					$colName = substr($callback, 1);
-					$callback = function($item) use ($colName) { return (int)$item->{$colName}; };
-				}
-				elseif ($callback[0] == '[')
-				{
-					$colName = substr($callback, 1);
-					$callback = function($item) use ($colName) { return (int)$item[$colName]; };
-				}
-			}
-			else
-			{
-				if ($callback == '.')
-				{
-					$callback = function($item) { return $item; };
-				}
-				elseif ($callback[0] == '.')
-				{
-					$colName = substr($callback, 1);
-					$callback = function($item) use ($colName) { return $item->{$colName}; };
-				}
-				elseif ($callback[0] == '[')
-				{
-					$colName = substr($callback, 1);
-					$callback = function($item) use ($colName) { return $item[$colName]; };
-				}
-			} */
 		}
 
 		return $callback;
@@ -118,11 +85,11 @@ class ProcI
 		return $this;
 	}
 
-    /**
-     * Order by callback return value
-     * @param ...$callbacks
-     * @return $this
-     */
+	/**
+	 * Order by callback return value
+	 * @param ...$callbacks
+	 * @return $this
+	 */
 	public function orderBy(...$callbacks) : self
 	{
 		if (!is_array($this->src)) $this->src = $this->toArray();
@@ -146,11 +113,11 @@ class ProcI
 		return $this;
 	}
 
-    /**
-     * Filter elements by callback
-     * @param string|array|callable $callback
-     * @return $this
-     */
+	/**
+	 * Filter elements by callback
+	 * @param string|array|callable $callback
+	 * @return $this
+	 */
 	public function filter(string|array|callable $callback) : self
 	{
 		$res = [];
@@ -165,61 +132,73 @@ class ProcI
 		return $this;
 	}
 
-    /**
-     * Retains only elements with selected keys.
-     * @param array $keys
-     * @param bool $strict
-     * @return $this
-     */
-    public function filterKey(array $keys, bool $strict = false) : self
-    {
-        $res = [];
-        foreach($this->src as $k => $item)
-        {
-            if (in_array($k, $keys, $strict)) $res[$k] = $item;
-        }
-        $this->src = $res;
-
-        return $this;
-    }
-
-    /**
-     * Reverses the order of the elements
-     * @return $this
-     */
-    public function reverse() : self
-    {
-        $this->src = array_reverse($this->src);
-        return $this;
-    }
-
-    /**
-     * Removes duplicates
-     * @return $this
-     */
-	public function unique() : self
+	/**
+	 * Retains only elements with selected keys.
+	 * @param array $keys
+	 * @param bool $strict
+	 * @return $this
+	 */
+	public function filterKey(array $keys, bool $strict = false) : self
 	{
-		$this->src = array_unique($this->src);
+		$res = [];
+		foreach($this->src as $k => $item)
+		{
+			if (in_array($k, $keys, $strict)) $res[$k] = $item;
+		}
+		$this->src = $res;
 
 		return $this;
 	}
 
-    /**
-     * Modifies the key structure according to the passed callbacks.
-     * @param ...$callbacks
-     * @return $this
-     */
+	/**
+	 * Reverses the order of the elements
+	 * @return $this
+	 */
+	public function reverse() : self
+	{
+		$this->src = array_reverse($this->src);
+		return $this;
+	}
+
+	/**
+	 * Removes duplicates
+	 * @param $compareBy
+	 * @param \Closure|callable|null $selectCallback
+	 * @return $this
+	 */
+	public function unique(string|array|callable|null $compareBy = null, \Closure|callable|null $selectCallback = null) : self
+	{
+		if (!$compareBy) {
+			$this->src = array_unique($this->src);
+		} else {
+			$byField = (clone $this)->struct($compareBy, null)->toArray();
+			$data = [];
+			foreach ($byField as $values) {
+				if ($selectCallback) $data[] = $selectCallback($values);
+				else $data[] = reset($values);
+			}
+			$this->src = $data;
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Modifies the key structure according to the passed callbacks.
+	 * @param ...$callbacks
+	 * @return $this
+	 */
 	public function struct(...$callbacks) : self
 	{
 		return $this->mapStruct(null, ...$callbacks);
 	}
 
-    /**
-     * Modifies each element with a callback and modifies the key structure according to the passed callbacks.
-     * @param $mapCallback
-     * @param ...$callbacks
-     * @return $this
-     */
+	/**
+	 * Modifies each element with a callback and modifies the key structure according to the passed callbacks.
+	 * @param $mapCallback
+	 * @param ...$callbacks
+	 * @return $this
+	 */
 	public function mapStruct($mapCallback, ...$callbacks) : self
 	{
 		$res = [];
@@ -232,7 +211,7 @@ class ProcI
 		$lastCallbackI = key($callbacks);
 		foreach($this->src as $k => $item)
 		{
-            $_k = $k;
+			$_k = $k;
 			$a = &$res;
 			foreach($callbacks as $i => $callback)
 			{
@@ -262,47 +241,51 @@ class ProcI
 		return $this;
 	}
 
-    /**
-     * randomizes the order of the elements
-     * @return $this
-     */
-    public function shuffle() : self
-    {
-        shuffle($this->src);
-        return $this;
-    }
+	/**
+	 * randomizes the order of the elements
+	 * @return $this
+	 */
+	public function shuffle() : self
+	{
+		shuffle($this->src);
+		return $this;
+	}
 
-    /**
-     * Leaves only part of the field between the indices.
-     * @param int $offset
-     * @param int $length
-     * @return $this
-     */
-    public function slice(int $offset, int $length) : self
-    {
-        $this->src = array_slice($this->src, $offset, $length);
-        return $this;
-    }
+	/**
+	 * Leaves only part of the field between the indices.
+	 * @param int $offset
+	 * @param int $length
+	 * @return $this
+	 */
+	public function slice(int $offset, int $length) : self
+	{
+		$this->src = array_slice($this->src, $offset, $length);
+		return $this;
+	}
 
-    /**
-     * Perform on the elements reduce. Unlike most other methods, it returns the result of reduce and does not modify the internal array.
-     * @param $callback
-     * @param $initial
-     * @return mixed
-     */
+	/**
+	 * Perform on the elements reduce. Unlike most other methods, it returns the result of reduce and does not modify the internal array.
+	 * @param $callback
+	 * @param $initial
+	 * @return mixed
+	 */
 	public function reduce($callback, $initial)
 	{
 		return array_reduce($this->src, $callback, $initial);
 	}
 
-    /**
-     * Returns the first element
-     * @param $callback
-     * @param $default
-     * @return mixed
-     */
-	public function first($callback, $default = null): mixed
+	/**
+	 * Returns the first element
+	 * @param $callback
+	 * If specified, the first item that matches the condition is selected.
+	 * @param $default
+	 * Defaults if the collection is empty or no matching item is found.
+	 * @return mixed
+	 */
+	public function first($callback = null, $default = null): mixed
 	{
+		if (!$callback) return reset($this->src);
+
 		$callback = self::prepareCallback($callback);
 
 		foreach($this->src as $k => $item)
@@ -319,14 +302,14 @@ class ProcI
 		else $this->src = $src;
 	}
 
-    /**
-     * Returns elements as array
-     * @return array
-     */
+	/**
+	 * Returns elements as array
+	 * @return array
+	 */
 	public function toArray(/*$iterable = null*/)
 	{
 		/* if ($iterable === null) $iterable = $this->src; */
-        $iterable = $this->src;
+		$iterable = $this->src;
 		if (!is_array($iterable)) {
 			$arr = [];
 			foreach($this->src as $k => $v) $arr[$k] = $v;
@@ -335,76 +318,76 @@ class ProcI
 		return $this->src;
 	}
 
-    /**
-     * Keep values only, remove keys. Applies `array_values` to internal arrays.
-     * @return $this
-     */
-    public function values() : self {
-        $this->src = array_values($this->src);
-        return $this;
-    }
+	/**
+	 * Keep values only, remove keys. Applies `array_values` to internal arrays.
+	 * @return $this
+	 */
+	public function values() : self {
+		$this->src = array_values($this->src);
+		return $this;
+	}
 
-    /**
-     * Keep keys only as values. Applies `array_keys` to internal arrays.
-     * @return $this
-     */
-    public function keys() : self {
-        $this->src = array_keys($this->src);
-        return $this;
-    }
+	/**
+	 * Keep keys only as values. Applies `array_keys` to internal arrays.
+	 * @return $this
+	 */
+	public function keys() : self {
+		$this->src = array_keys($this->src);
+		return $this;
+	}
 
-    /**
-     * Create instance of ProcI
-     * @param ...$srcs
-     * @return self
-     */
+	/**
+	 * Create instance of ProcI
+	 * @param ...$srcs
+	 * @return self
+	 */
 	public static function from(...$srcs) : self
 	{
-        $src = [];
-        if (count($srcs) > 1) {
-            foreach ($srcs as $block) {
-                foreach ($block as $item) {
-                    $src[] = $item;
-                }
-            }
-        } else {
-            foreach (reset($srcs) as $k => $item) {
-                $src[$k] = $item;
-            }
-        }
+		$src = [];
+		if (count($srcs) > 1) {
+			foreach ($srcs as $block) {
+				foreach ($block as $item) {
+					$src[] = $item;
+				}
+			}
+		} else {
+			foreach (reset($srcs) as $k => $item) {
+				$src[$k] = $item;
+			}
+		}
 
 		return new ProcI($src);
 	}
 
-    public static function cartesianProduct(array $arrays, $callback = null): array {
-        if (count($arrays) == 0) {
-            return [[]];
-        }
+	public static function cartesianProduct(array $arrays, $callback = null): array {
+		if (count($arrays) == 0) {
+			return [[]];
+		}
 
-        $result = [];
-        foreach ($arrays[0] as $a) {
-            foreach (self::cartesianProduct(array_slice($arrays, 1)) as $product) {
-                array_unshift($product, $a);
-                $result[] = $callback
-                    ? $callback(...$product)
-                    : $product;
-            }
-        }
+		$result = [];
+		foreach ($arrays[0] as $a) {
+			foreach (self::cartesianProduct(array_slice($arrays, 1)) as $product) {
+				array_unshift($product, $a);
+				$result[] = $callback
+					? $callback(...$product)
+					: $product;
+			}
+		}
 
-        return $result;
-    }
+		return $result;
+	}
 
-    /**
-     * @param array[] $arrays
-     * @return ProcI
-     */
-    public static function fromCartesian(array $arrays, $callback = null): ProcI
-    {
-        return self::from(self::cartesianProduct($arrays, $callback));
-    }
+	/**
+	 * @param array[] $arrays
+	 * @return ProcI
+	 */
+	public static function fromCartesian(array $arrays, $callback = null): ProcI
+	{
+		return self::from(self::cartesianProduct($arrays, $callback));
+	}
 
 
-    //
+	//
 	public static function selectFields($src, array $fields, bool $trans = false) : array
 	{
 		$res = [];
@@ -437,63 +420,63 @@ class ProcI
 		return $this;
 	}
 
-    /**
-     * Returns true if the passed condition applies to all elements or the array is empty
-     * @param $callback
-     * @return bool
-     */
-    public function allMeets($callback) : bool {
-        $callback = self::prepareCallback($callback);
-        foreach ($this->src as $k => $v) {
-            if (!$callback($v, $k)) return false;
-        }
+	/**
+	 * Returns true if the passed condition applies to all elements or the array is empty
+	 * @param $callback
+	 * @return bool
+	 */
+	public function allMeets($callback) : bool {
+		$callback = self::prepareCallback($callback);
+		foreach ($this->src as $k => $v) {
+			if (!$callback($v, $k)) return false;
+		}
 
-        return true;
-    }
+		return true;
+	}
 
-    /**
-     * Returns true if the passed condition is valid for at least one element
-     * @param $callback
-     * @return bool
-     */
-    public function anyMeets($callback) : bool {
-        $callback = self::prepareCallback($callback);
-        foreach ($this->src as $k => $v) {
-            if ($callback($v, $k)) return true;
-        }
+	/**
+	 * Returns true if the passed condition is valid for at least one element
+	 * @param $callback
+	 * @return bool
+	 */
+	public function anyMeets($callback) : bool {
+		$callback = self::prepareCallback($callback);
+		foreach ($this->src as $k => $v) {
+			if ($callback($v, $k)) return true;
+		}
 
-        return false;
-    }
+		return false;
+	}
 
-    /**
-     * Returns true if all elements are equal to the passed value.
-     * @param mixed $value
-     * @param bool $exact
-     * @return bool
-     */
-    public function allAre(mixed $value, bool $exact = false) : bool {
-        foreach ($this->src as $k => $v) {
-            if ($exact ? ($v !== $value) : ($v != $value)) return false;
-        }
+	/**
+	 * Returns true if all elements are equal to the passed value.
+	 * @param mixed $value
+	 * @param bool $exact
+	 * @return bool
+	 */
+	public function allAre(mixed $value, bool $exact = false) : bool {
+		foreach ($this->src as $k => $v) {
+			if ($exact ? ($v !== $value) : ($v != $value)) return false;
+		}
 
-        return true;
-    }
+		return true;
+	}
 
-    /**
-     * Returns true if at least one element is equal to the passed value.
-     * @param mixed $value
-     * @param bool $exact
-     * @return bool
-     */
-    public function anyIs(mixed $value, bool $exact = false) : bool {
-        foreach ($this->src as $k => $v) {
-            if ($exact ? ($v === $value) : ($v == $value)) return true;
-        }
+	/**
+	 * Returns true if at least one element is equal to the passed value.
+	 * @param mixed $value
+	 * @param bool $exact
+	 * @return bool
+	 */
+	public function anyIs(mixed $value, bool $exact = false) : bool {
+		foreach ($this->src as $k => $v) {
+			if ($exact ? ($v === $value) : ($v == $value)) return true;
+		}
 
-        return false;
-    }
+		return false;
+	}
 
-    public function _deepMap(int $level, $callback, &$ls, array $ks)
+	public function _deepMap(int $level, $callback, &$ls, array $ks)
 	{
 		if ($level)
 		{
@@ -526,16 +509,16 @@ class ProcI
 			}
 		}
 	} */
-    public function iterSrc()
-    {
-        $newSrc = [];
-        foreach ($this->src as $k => $v)
-            $newSrc[$k] = $v;
+	public function iterSrc()
+	{
+		$newSrc = [];
+		foreach ($this->src as $k => $v)
+			$newSrc[$k] = $v;
 
-        $this->src = $newSrc;
+		$this->src = $newSrc;
 
-        return $this;
-    }
+		return $this;
+	}
 }
 
 function PrI($src)
