@@ -92,3 +92,21 @@ print_r(
 		)
 		->toArray()
 );
+echo "ReduceBy\n";
+
+print_r(
+    ProcI::from([
+        [ 'a' => 1, 'b' => 2, 'c' => 3 ],
+        [ 'a' => 2, 'b' => 2, 'c' => 4 ],
+        [ 'a' => 2, 'b' => 5, 'c' => 5 ],
+        [ 'a' => 2, 'b' => 5, 'c' => 6 ],
+        [ 'a' => 1, 'b' => 5, 'c' => 7 ],
+    ])->reduceBy(
+        [
+            new \Murdej\ProcIReduceField('su', '[c', fn($a, $b) => $a + $b, 0),
+            new \Murdej\ProcIReduceField('mu', '[c', fn($a, $b) => $a * $b, 1),
+            new \Murdej\ProcIReduceField('co', '[c', fn($a, $b) => "$a / $b", '*'),
+        ],
+        [ '[a', '[b' ]
+    )->toArray()
+);

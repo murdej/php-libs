@@ -27,4 +27,20 @@ class Math
 			$rates
 		);
 	}
+
+    /**
+     * Compares two mixed values after rounding them based on a specified accuracy.
+     *
+     * @param mixed $a The first value to compare.
+     * @param mixed $b The second value to compare.
+     * @param float $accuracy The divisor used for normalization before rounding. A higher value means lower "accuracy" (larger rounding unit). Defaults to 1.
+     * @return int Returns -1 if $a is less than $b, 0 if they are equal, and 1 if $a is greater than $b (after normalization and rounding).
+     */
+    public static function compareAccuracy(mixed $a, mixed $b, float $accuracy = 1): int
+    {
+        $a = round((float)$a / $accuracy);
+        $b = round((float)$b / $accuracy);
+
+        return $a <=> $b;
+    }
 }

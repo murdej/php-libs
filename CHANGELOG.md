@@ -1,5 +1,11 @@
 # PHP libs by Murdej
 
+## 1.9.0
+
+ - New method `Math::compareAccuracy` 
+ - New method `ProcI::reduceStruct` 
+ - New method `StringWalk::findNextPreg` and property `StringWalk::$lastMatch` 
+
 ## 1.8.0
 
  - new static class `Math`

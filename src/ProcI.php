@@ -86,7 +86,7 @@ class ProcI
 	}
 
 	/**
-	 * Order by callback return value
+	 * Order by callback return value of callback
 	 * @param ...$callbacks
 	 * @return $this
 	 */
@@ -241,7 +241,56 @@ class ProcI
 		return $this;
 	}
 
-	/**
+    /**
+     * @param $reduceCallback ($carry, $value, $key, $isFirst)
+     * @param ...$callbacks
+     * @return $this
+     * @todo
+     */
+    public function reduceStruct($reduceCallback, ...$callbacks) : self
+    {
+        $res = [];
+        $acc = [];
+        $reduceCallback = self::prepareCallback($reduceCallback);
+        foreach($callbacks as $i => $callback)
+        {
+            $callbacks[$i] = self::prepareCallback($callback);
+        }
+        end($callbacks);
+        $lastCallbackI = key($callbacks);
+        foreach($this->src as $k => $item)
+        {
+            $_k = $k;
+            $a = &$res;
+            foreach($callbacks as $i => $callback)
+            {
+                if ($callback)
+                {
+                    $k = $callback($item, $k);
+                }
+                else
+                {
+                    $a[] = [];
+                    end($a);
+                    $k = key($a);
+                }
+                if ($i === $lastCallbackI)
+                {
+                    $a[$k] = $reduceCallback ? $reduceCallback($item, $_k) : $item;
+                }
+                else
+                {
+                    if (!isset($a[$k])) $a[$k] = [];
+                    $a = &$a[$k];
+                }
+            }
+        }
+        $this->src = $res;
+
+        return $this;
+    }
+
+    /**
 	 * randomizes the order of the elements
 	 * @return $this
 	 */
@@ -386,6 +435,49 @@ class ProcI
 		return self::from(self::cartesianProduct($arrays, $callback));
 	}
 
+    /**
+     * @param ProcIReduceField[] $fields
+     * @param array<int|string, string|callable> $byFields
+     * @return $this
+     */
+    public function reduceBy(
+        array $fields,
+        array $byFields,
+    )
+    {
+        $initValues = ProcI::from($fields)
+            ->mapStruct('.initValue', '.fieldName')
+            ->toArray();
+        $values = [];
+        $fields = array_map(
+            fn(ProcIReduceField $field) => new ProcIReduceField(
+                $field->fieldName,
+                self::prepareCallback($field->getCallback),
+                self::prepareCallback($field->reduceCallback),
+                $field->initValue
+            ),
+            $fields
+        );
+        $byFields = ProcI::from($byFields)
+            ->map(fn($field) => self::prepareCallback($field))
+            ->toArray();
+
+        foreach ($this->src as $k => $row) {
+            $keys = array_map(fn($callback) => $callback($row), $byFields);
+            $keyStr = json_encode($keys);
+            if (!isset($values[$keyStr])) $values[$keyStr] = $initValues + $keys;
+            foreach ($fields as $field) {
+                $values[$keyStr][$field->fieldName] = ($field->reduceCallback)(
+                    $values[$keyStr][$field->fieldName],
+                    ($field->getCallback)($row)
+                );
+            }
+        }
+        $this->src = array_values($values);
+
+        return $this;
+    }
+
 
 	//
 	public static function selectFields($src, array $fields, bool $trans = false) : array
@@ -393,10 +485,11 @@ class ProcI
 		$res = [];
 		foreach($src as $k => $v)
 		{
-			if ($trans)
+			if ($trans) {
 				if (isset($fields[$k])) $res[$fields[$k]] = $v;
-			else 
+			} else {
 				if (in_array($k, $fields)) $res[$k] = $v;
+			}
 		}
 		return $res;
 	}

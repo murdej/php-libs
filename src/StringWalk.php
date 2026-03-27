@@ -44,6 +44,8 @@ class StringWalk
 
 	public $lastMarkName = null;
 
+    public $lastMatch = null;
+
 	public function findNext($needles, $cs = true)
 	{
 		$res = [];
@@ -77,6 +79,19 @@ class StringWalk
 
 		return $this->lastChunk;
 	}
+
+    public function findNextPreg($pattern)
+    {
+        $this->lastChunk = null;
+        $this->lastChunkNum = null;
+        if (preg_match($pattern, $this->src, $matches, PREG_OFFSET_CAPTURE, $this->pos)) {
+            $this->lastMatch = $matches;
+            [ $this->lastChunk, $this->pos ] = $matches[0];
+
+            $this->trace('findNextPreg', $pattern);
+        }
+        return $this->lastChunk;
+    }
 
 	public function saveMark($n = '.') 
 	{
