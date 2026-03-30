@@ -110,3 +110,12 @@ print_r(
         [ '[a', '[b' ]
     )->toArray()
 );
+
+echo "ProcI::selectFields\n";
+
+print_r(
+    ProcI::selectFields(
+        ['a' => 12, 'b' => 13, 'c' => 14],
+        ['a', 'b', 'd'],
+    )
+);
