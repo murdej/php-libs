@@ -43,4 +43,28 @@ class Math
 
         return $a <=> $b;
     }
+
+    public static function parseFloat(mixed $value): ?float
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        if (is_float($value) || is_int($value)) {
+            return (float) $value;
+        }
+
+        if (is_string($value)) {
+            $cleanedValue = trim($value);
+            if ($cleanedValue === '') {
+                return null;
+            }
+            $normalizedValue = str_replace(',', '.', $cleanedValue);
+            if (is_numeric($normalizedValue)) {
+                return (float) $normalizedValue;
+            }
+        }
+
+        return null;
+    }
 }

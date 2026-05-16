@@ -1,5 +1,9 @@
 # PHP libs by Murdej
 
+## 1.10.0
+
+ - New method `Math::parseFloat` 
+
 ## 1.9.0
 
  - New method `Math::compareAccuracy` 
