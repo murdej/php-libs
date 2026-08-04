@@ -2,7 +2,7 @@
 
 namespace Murdej\DTO;
 
-class ErrorListMessage
+class ErrorListMessage extends SmartDTO
 {
     public function __construct(
         public string $field,

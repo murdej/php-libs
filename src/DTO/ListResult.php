@@ -7,7 +7,7 @@ use Murdej\ProcI;
 /**
  * @template T
  */
-class ListResult
+class ListResult extends SmartDTO
 {
     public function __construct(
         /**

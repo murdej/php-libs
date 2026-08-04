@@ -4,7 +4,7 @@ namespace Murdej\DTO;
 
 use Murdej\ErrorList;
 
-class CommonResult implements \JsonSerializable
+class CommonResult extends SmartDTO
 {
 
 	const StatusOk = 'ok';
@@ -21,7 +21,7 @@ class CommonResult implements \JsonSerializable
         public mixed $data = []
     )
 	{
-		$this->errors = new ErrorList($data);
+		$this->errors = new ErrorList($data ?? []);
 	}
 
 	public function jsonSerialize(): mixed
@@ -40,9 +40,9 @@ class CommonResult implements \JsonSerializable
         return $res;
     }
 
-    public static function ok(mixed $data = null): static
+    public static function ok(mixed $data = null, mixed $defaultData = []): static
     {
-        return new static($data ?? []);
+        return new static($data ?? $defaultData);
     }
 
 }
