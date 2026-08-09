@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Contracts\Attributes;
+namespace Murdej\DTO\Attributes;
 
 use Attribute;
 

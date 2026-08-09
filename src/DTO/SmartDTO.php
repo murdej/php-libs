@@ -2,7 +2,7 @@
 
 namespace Murdej\DTO;
 
-use App\Contracts\Attributes\ArrayItemType;
+use Murdej\DTO\Attributes\ArrayItemType;
 use BackedEnum;
 use DateTime;
 use DateTimeImmutable;

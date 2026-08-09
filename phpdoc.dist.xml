@@ -6,7 +6,7 @@
 >
     <title>phpDocumentor</title>
     <paths>
-        <output>docs/api</output>
+        <output>api-docs/api</output>
     </paths>
     <version number="3.0.0">
         <api>
@@ -15,8 +15,8 @@
             </source>
         </api>
         <guide>
-            <source dsn="docs">
-                <path>./docs-src/index.rst</path>
+            <source dsn=".">
+                <path>docs-src</path>
             </source>
         </guide>
     </version>

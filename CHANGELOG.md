@@ -2,7 +2,10 @@
 
 ## 1.10.0
 
+ - New class `SmartDTO` - DTO base class with `toArray`/`fromArray`, `ArrayAccess`, `JsonSerializable`, automatic conversion of enums, `DateTimeInterface` and nested DTOs, and `toDbValue`/`fromDbValue` for DB (de)serialization
+   - `ArrayItemType` attribute for typing items of `array` properties (namespace `Murdej\DTO\Attributes`)
  - New method `Math::parseFloat` 
+ - New per-class documentation under `docs/`, cross-linked with the generated API reference in `api-docs/`
 
 ## 1.9.0
 
