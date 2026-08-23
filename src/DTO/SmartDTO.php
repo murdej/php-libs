@@ -53,6 +53,10 @@ abstract class SmartDTO implements JsonSerializable, \ArrayAccess
 	{
 		if ($value === null) return null;
 
+		if ($value instanceof BackedEnum) {
+			return $value->value;
+		}
+
 		if ($value instanceof DateTimeInterface) {
 			return DateTime::createFromInterface($value)->format(DATE_ATOM);
 		}
@@ -120,8 +124,31 @@ abstract class SmartDTO implements JsonSerializable, \ArrayAccess
 
         $typeName = $type->getName();
 
-        if (enum_exists($typeName)) {
+        if ($typeName === 'array' && is_array($value)) {
+            $attrs = $property->getAttributes(ArrayItemType::class);
+            if (!empty($attrs)) {
+                /** @var ArrayItemType $attr */
+                $attr = $attrs[0]->newInstance();
+                $itemClass = $attr->itemType;
+                return array_map(fn($item) => self::valueFromType($item, $itemClass), $value);
+            }
+            return $value;
+        }
+
+        return self::valueFromType($value, $typeName);
+    }
+
+    /**
+     * Konverze jedné hodnoty na daný typ (skalární vlastnost, nebo položka pole u #[ArrayItemType]).
+     * @param mixed $value Hodnota z pole.
+     * @param string $typeName Cílový typ (jméno třídy/enumu, nebo skalární typ).
+     * @return mixed
+     */
+    private static function valueFromType(mixed $value, string $typeName): mixed
+    {
+        if (is_a($typeName, BackedEnum::class, true)) {
             /** @var class-string<BackedEnum> $typeName */
+            if ($value instanceof $typeName) return $value;
             return $typeName::tryFrom($value) ?? $value;
         }
 
@@ -129,18 +156,8 @@ abstract class SmartDTO implements JsonSerializable, \ArrayAccess
             return self::parseDateTime($value, $typeName);
         }
 
-		if (is_subclass_of($typeName, self::class) && $value !== null) {
-			return $typeName::fromArray($value);
-		}
-
-        if ($typeName === 'array' && is_array($value)) {
-            $attrs = $property->getAttributes(ArrayItemType::class);
-            if (!empty($attrs)) {
-                /** @var ArrayItemType $attr */
-                $attr = $attrs[0]->newInstance();
-                $itemClass = $attr->itemType;
-                return array_map(fn($item) => $itemClass::fromArray($item), $value);
-            }
+        if (is_subclass_of($typeName, self::class) && $value !== null) {
+            return $typeName::fromArray($value);
         }
 
         return $value;
