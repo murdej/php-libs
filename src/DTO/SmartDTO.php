@@ -146,17 +146,21 @@ abstract class SmartDTO implements JsonSerializable, \ArrayAccess
      */
     private static function valueFromType(mixed $value, string $typeName): mixed
     {
+        if ($value === null) {
+            return null;
+        }
+
         if (is_a($typeName, BackedEnum::class, true)) {
             /** @var class-string<BackedEnum> $typeName */
             if ($value instanceof $typeName) return $value;
-            return $typeName::tryFrom($value) ?? $value;
+            return (is_string($value) || is_int($value)) ? ($typeName::tryFrom($value) ?? $value) : $value;
         }
 
         if (is_subclass_of($typeName, DateTimeInterface::class)) {
             return self::parseDateTime($value, $typeName);
         }
 
-        if (is_subclass_of($typeName, self::class) && $value !== null) {
+        if (is_subclass_of($typeName, self::class)) {
             return $typeName::fromArray($value);
         }
 
